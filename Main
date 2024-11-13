@@ -1,0 +1,38 @@
+#include <Wire.h>
+#include <U8glib.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define DS18B20_PIN A0
+
+OneWire oneWire(DS18B20_PIN); 
+DallasTemperature sensors(&oneWire);
+
+#define SSD1306_I2C_ADDRESS 0x3C
+
+U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NO_ACK);
+
+void setup() {
+  Serial.begin(9600);
+  sensors.begin();
+  u8g.setFont(u8g_font_8x13B);
+  u8g.setColorIndex(1);
+}
+
+void loop() {
+  sensors.requestTemperatures();
+  float temperatureC = sensors.getTempCByIndex(0);
+
+  Serial.print("Temperatura: ");
+  Serial.print(temperatureC);
+  Serial.println(" C");
+
+  u8g.firstPage();
+  do {
+    u8g.drawStr(5, 15, "Temp: ");
+    u8g.drawStr(40, 15, String(temperatureC).c_str());
+    u8g.drawStr(70, 15, " C");
+  } while (u8g.nextPage());
+
+  delay(2000);
+}
